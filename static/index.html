@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8fb">
+  <title>Smart Filter · Sample tables</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Smart Filter home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span><strong>Fielddesk</strong><small>OPERATIONS</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="environment"><i></i> LOCAL DEMO</span>
+        <span class="avatar" aria-label="Demo user">JD</span>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-heading">
+        <div>
+          <div class="breadcrumb">Operations <span>/</span> Maintenance</div>
+          <h1 id="dataset-title">Work orders</h1>
+          <p class="page-subtitle" id="dataset-subtitle">Search and triage service work across your solar sites.</p>
+        </div>
+        <div class="dataset-controls">
+          <label class="dataset-picker">Sample table
+            <select id="dataset-select" aria-label="Choose a sample table">
+              <option value="work_orders">Work orders</option>
+              <option value="site_inspections">Site inspections</option>
+            </select>
+          </label>
+          <div class="dataset-pill"><span class="pulse-dot"></span><strong id="dataset-count">2,500</strong> synthetic records</div>
+        </div>
+      </div>
+
+      <section class="workspace" aria-label="Sample records and filters">
+        <aside class="filter-panel">
+          <div class="panel-title-row">
+            <div><p class="eyebrow">NATURAL LANGUAGE</p><h2>Smart filter</h2></div>
+            <button class="text-button" id="reset-all" type="button">Reset</button>
+          </div>
+
+          <div class="smart-card">
+            <div class="smart-card-heading">
+              <span class="sparkle" aria-hidden="true">✳</span>
+              <div><strong>Smart filter</strong><span>Describe what you need</span></div>
+              <span class="local-tag">OLLAMA</span>
+            </div>
+            <label class="sr-only" for="smart-query">Describe the records to find</label>
+            <textarea id="smart-query" rows="3" placeholder="e.g. Critical inverter jobs in Munster over €5,000"></textarea>
+            <button class="primary-button" id="ask-ai" type="button"><span>✦</span> Apply smart filter</button>
+            <p class="smart-hint">The model turns your request into safe database filters.</p>
+          </div>
+
+          <div class="filter-footnote"><span class="shield-icon">✓</span><span>AI output is checked against this table's fields before it runs.</span></div>
+        </aside>
+
+        <section class="results-panel" aria-label="Sample table results">
+          <div class="results-toolbar">
+            <div><h2 id="results-title">All work orders</h2><p id="result-subtitle">Browse the synthetic maintenance dataset.</p></div>
+          </div>
+
+          <div id="applied-bar" class="applied-bar hidden">
+            <span class="applied-icon">✦</span>
+            <span class="applied-label">Applied</span>
+            <span id="applied-text"></span>
+            <button id="clear-smart" class="clear-smart" type="button" aria-label="Clear smart filter">×</button>
+          </div>
+
+          <div id="error-banner" class="error-banner hidden" role="alert"></div>
+          <div class="table-frame">
+            <table>
+              <thead id="columns-head"></thead>
+              <tbody id="rows-body"><tr><td colspan="11" class="loading-cell">Loading records…</td></tr></tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <span id="range-label">Loading…</span>
+            <div class="pagination"><button id="prev-page" class="page-button" type="button" aria-label="Previous page">←</button><span id="page-label">Page 1</span><button id="next-page" class="page-button" type="button" aria-label="Next page">→</button></div>
+          </div>
+
+          <details class="plan-details hidden" id="plan-details">
+            <summary><span class="summary-check">✓</span> Inspect the validated query plan</summary>
+            <pre id="plan-json"></pre>
+          </details>
+        </section>
+      </section>
+      <footer class="page-footer"><span>Demo data only · SQLite · local Ollama</span><span id="model-label">Model: loading…</span></footer>
+    </main>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
