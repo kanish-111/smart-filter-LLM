@@ -360,6 +360,13 @@ def normalize_model_categories(
         values = mentioned.get(field_name)
         if not values:
             return None
+        operation = node.get("op")
+        if operation in {"neq", "not_contains"}:
+            exclusions = [
+                {"field": field_name, "op": operation, "value": value}
+                for value in values
+            ]
+            return exclusions[0] if len(exclusions) == 1 else {"and": exclusions}
         return (
             {"field": field_name, "op": "eq", "value": values[0]}
             if len(values) == 1

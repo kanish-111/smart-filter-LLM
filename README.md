@@ -1,8 +1,8 @@
 # Smart Filter Demo
 
-This project shows how to let someone search a data table with ordinary language, for example: “Find failed safety inspections in Munster with more than five hours of downtime.”
+![Smart Filter showing failed safety inspections in Munster with more than five hours of downtime](screenshots/smart-filter.png)
 
-The language model turns the request into a small JSON filter plan. Python checks that plan against the selected table's schema, then runs a parameterized SQLite query. The model never writes or runs SQL.
+> Filter tables using plain English. A local LLM proposes JSON filters; Python validates them and builds the SQLite query. The model never generates SQL.
 
 The demo includes two fictional, repeatable datasets:
 
@@ -24,6 +24,12 @@ python app.py
 
 Open <http://127.0.0.1:8000>. The SQLite file is included. `python seed.py` fills in a missing or empty sample table. Use `python seed.py --force` to replace both tables with fresh copies of the same deterministic data.
 
+Run the category-normalization regression tests with:
+
+```powershell
+python -m unittest discover -s tests
+```
+
 ### Choose another Ollama model
 
 `qwen2.5-coder:1.5b` is the default, not a requirement. You can use another Ollama chat, instruction, or coding model with similar or greater ability to follow instructions and return JSON. Larger models often need more memory and can respond more slowly. Filter plans can vary by model, so choose one that follows the supplied schema reliably.
@@ -42,47 +48,9 @@ This app calls Ollama's OpenAI-compatible `/v1/chat/completions` endpoint and re
 
 ## How a smart filter works
 
-```text
-+----------------------------------------------------------+
-| 1. Person chooses a table and describes what they need   |
-+----------------------------------------------------------+
-                               |
-                               v
-+----------------------------------------------------------+
-| 2. Browser sends the table key, request, and page number |
-|    to the Python API (/api/query)                        |
-+----------------------------------------------------------+
-                               |
-                               v
-+----------------------------------------------------------+
-| 3. Python selects that table's schema from DATASETS      |
-|    and sends the schema and request to Ollama            |
-+----------------------------------------------------------+
-                               |
-                               v
-+----------------------------------------------------------+
-| 4. Ollama returns a JSON plan: filters, sort, and limit  |
-+----------------------------------------------------------+
-                               |
-                               v
-+----------------------------------------------------------+
-| 5. Python checks each field, operator, and value         |
-|    Invalid plans get one repair attempt                  |
-+----------------------------------------------------------+
-                               |
-                               v
-+----------------------------------------------------------+
-| 6. Python compiles the valid plan into parameterized SQL |
-+----------------------------------------------------------+
-                               |
-                               v
-+----------------------------------------------------------+
-| 7. SQLite filters the selected table                     |
-|    Python returns the rows and plan to the browser       |
-+----------------------------------------------------------+
-```
+![Smart Filter architecture: browser request, local Ollama JSON plan, Python validation, parameterized SQLite query, and filtered results](screenshots/smart-filter-architecture.png)
 
-The model receives one table's field names, types, descriptions, and sample category values. It does not receive database credentials or SQL tools. Python accepts only registered table and column names; filter values are passed to SQLite separately as parameters.
+The model receives one table's field names, labels, types, synonyms, and sample values. It does not receive database credentials or SQL tools. Python accepts only registered table and column names; filter values are passed to SQLite separately as parameters.
 
 ## What is in a filter plan?
 
@@ -106,8 +74,9 @@ A plan is JSON data, not executable code. It describes conditions, sort order, a
 Available operators depend on the field type:
 
 - **Text:** `eq`, `neq`, `contains`, `not_contains`, `in`, `is_null`, `is_not_null`.
-- **Number and date:** `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `between`, `in`, `is_null`, `is_not_null`.
-- **Full-text search:** `_text` searches fields marked `search: True`; it supports `contains` and `not_contains`.
+- **Number:** `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `between`, `in`, `is_null`, `is_not_null`.
+- **Date:** `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `between`, `is_null`, `is_not_null`.
+- **Searchable text:** `_text` searches fields marked `search: True`; it supports `contains` and `not_contains`.
 
 The server also checks group depth, value types, date format, sort fields, and limits before it builds a query. Text and numeric values never become SQL syntax.
 
@@ -123,6 +92,12 @@ The two datasets use one shared planner, validator, SQL compiler, API, and resul
 
 The browser builds its table selector and column headings from `/api/meta`. The common filter operators work automatically for registered fields; custom SQL generation is not needed.
 
+## Limitations
+
+- The included records are synthetic demo data, and queries require a local Ollama model.
+- Model interpretations can vary. Review the validated plan and results when query meaning matters.
+- This demo has not been hardened or evaluated for production use.
+
 ## API and code map
 
 - `GET /api/meta` — dataset names, record counts, result columns, and active model name.
@@ -136,5 +111,12 @@ Main files:
 - `static/index.html` — page structure and controls.
 - `static/app.js` — API requests, dataset switching, and table rendering.
 - `static/styles.css` — page styling.
+- `tests/test_category_normalization.py` — category negation regression tests.
 - `data/work_orders.sqlite3` — included SQLite database with both tables.
 - `scripts/test_ollama.py` — optional integration check; it sends real requests to the configured local Ollama model.
+
+## License
+
+Released under the [MIT License](LICENSE).
+
+Follow [Kanish R on X](https://x.com/r_kanish39522) for development updates.
