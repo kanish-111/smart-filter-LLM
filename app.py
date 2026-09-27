@@ -41,35 +41,61 @@ def load_local_env() -> None:
 
 load_local_env()
 
-# These field lists are the allowlist: the model may only refer to columns listed here.
+# Each field is both an allowlisted database column and a hint for the model.
+# Descriptions explain what a value means; labels and synonyms help match user wording.
+# `search` is server-side configuration for the special full-text `_text` filter.
 FIELDS: list[dict[str, Any]] = [
-    {"name": "ticket_no", "label": "Work order", "kind": "text", "synonyms": ["ticket", "work order", "id"], "search": True},
-    {"name": "site_name", "label": "Site", "kind": "text", "synonyms": ["site", "location", "solar farm"], "search": True},
-    {"name": "region", "label": "Region", "kind": "text", "synonyms": ["county", "area"], "search": True},
-    {"name": "asset_type", "label": "Asset type", "kind": "text", "synonyms": ["equipment type", "component type"], "search": True},
-    {"name": "asset_name", "label": "Asset", "kind": "text", "synonyms": ["equipment", "component", "name"], "search": True},
-    {"name": "status", "label": "Status", "kind": "text", "synonyms": ["state"], "search": True},
-    {"name": "priority", "label": "Priority", "kind": "text", "synonyms": ["severity", "urgency"], "search": True},
-    {"name": "technician", "label": "Technician", "kind": "text", "synonyms": ["assignee", "owner"], "search": True},
-    {"name": "opened_at", "label": "Opened", "kind": "date", "synonyms": ["date opened", "created", "opened date"]},
-    {"name": "days_open", "label": "Days open", "kind": "number", "synonyms": ["age", "duration", "days outstanding"]},
-    {"name": "estimated_cost_eur", "label": "Estimated cost (€)", "kind": "number", "synonyms": ["cost", "price", "budget", "euros"]},
-    {"name": "generation_loss_kw", "label": "Generation loss (kW)", "kind": "number", "synonyms": ["loss", "lost generation", "capacity loss"]},
-    {"name": "notes", "label": "Notes", "kind": "text", "synonyms": ["description", "details"], "search": True},
+    {"name": "ticket_no", "label": "Work order", "kind": "text",
+     "description": "Unique work order identifier.", "synonyms": ["ticket", "work order", "id"], "search": True},
+    {"name": "site_name", "label": "Site", "kind": "text",
+     "description": "Name of the solar site where the work is needed.", "synonyms": ["site", "location", "solar farm"], "search": True},
+    {"name": "region", "label": "Region", "kind": "text",
+     "description": "Irish region containing the site.", "synonyms": ["county", "area"], "search": True},
+    {"name": "asset_type", "label": "Asset type", "kind": "text",
+     "description": "Category of equipment needing work.", "synonyms": ["equipment type", "component type"], "search": True},
+    {"name": "asset_name", "label": "Asset", "kind": "text",
+     "description": "Name and model of the specific equipment.", "synonyms": ["equipment", "component", "name"], "search": True},
+    {"name": "status", "label": "Status", "kind": "text",
+     "description": "Current workflow state of the work order.", "synonyms": ["state"], "search": True},
+    {"name": "priority", "label": "Priority", "kind": "text",
+     "description": "Urgency assigned to the work order.", "synonyms": ["severity", "urgency"], "search": True},
+    {"name": "technician", "label": "Technician", "kind": "text",
+     "description": "Technician assigned to the work order, if any.", "synonyms": ["assignee", "owner"], "search": True},
+    {"name": "opened_at", "label": "Opened", "kind": "date",
+     "description": "Date the work order was opened (YYYY-MM-DD).", "synonyms": ["date opened", "created", "opened date"]},
+    {"name": "days_open", "label": "Days open", "kind": "number",
+     "description": "Recorded number of days the work order was open.", "synonyms": ["age", "duration", "days outstanding"]},
+    {"name": "estimated_cost_eur", "label": "Estimated cost (€)", "kind": "number",
+     "description": "Estimated cost of the work order in euros.", "synonyms": ["cost", "price", "budget", "euros"]},
+    {"name": "generation_loss_kw", "label": "Generation loss (kW)", "kind": "number",
+     "description": "Estimated reduction in power generation in kilowatts.", "synonyms": ["loss", "lost generation", "capacity loss"]},
+    {"name": "notes", "label": "Notes", "kind": "text",
+     "description": "Free-text maintenance notes about the work order.", "synonyms": ["description", "details"], "search": True},
 ]
 FIELD_BY_NAME = {field["name"]: field for field in FIELDS}
 INSPECTION_FIELDS: list[dict[str, Any]] = [
-    {"name": "inspection_id", "label": "Inspection", "kind": "text", "synonyms": ["inspection id", "id"], "search": True},
-    {"name": "site_name", "label": "Site", "kind": "text", "synonyms": ["site", "location", "solar farm"], "search": True},
-    {"name": "region", "label": "Region", "kind": "text", "synonyms": ["county", "area"], "search": True},
-    {"name": "inspector", "label": "Inspector", "kind": "text", "synonyms": ["assignee", "person"], "search": True},
-    {"name": "inspection_type", "label": "Inspection type", "kind": "text", "synonyms": ["type", "category"], "search": True},
-    {"name": "result", "label": "Result", "kind": "text", "synonyms": ["outcome", "status"], "search": True},
-    {"name": "inspected_at", "label": "Inspection date", "kind": "date", "synonyms": ["date", "inspected", "inspection date"]},
-    {"name": "issues_found", "label": "Issues found", "kind": "number", "synonyms": ["issues", "faults", "findings"]},
-    {"name": "downtime_hours", "label": "Downtime (hours)", "kind": "number", "synonyms": ["downtime", "outage"]},
-    {"name": "estimated_cost_eur", "label": "Estimated cost (EUR)", "kind": "number", "synonyms": ["cost", "price", "budget", "euros"]},
-    {"name": "summary", "label": "Summary", "kind": "text", "synonyms": ["notes", "description", "details"], "search": True},
+    {"name": "inspection_id", "label": "Inspection", "kind": "text",
+     "description": "Unique identifier of the site inspection.", "synonyms": ["inspection id", "id"], "search": True},
+    {"name": "site_name", "label": "Site", "kind": "text",
+     "description": "Name of the solar site inspected.", "synonyms": ["site", "location", "solar farm"], "search": True},
+    {"name": "region", "label": "Region", "kind": "text",
+     "description": "Irish region containing the inspected site.", "synonyms": ["county", "area"], "search": True},
+    {"name": "inspector", "label": "Inspector", "kind": "text",
+     "description": "Person who performed the inspection.", "synonyms": ["assignee", "person"], "search": True},
+    {"name": "inspection_type", "label": "Inspection type", "kind": "text",
+     "description": "Category or purpose of the inspection.", "synonyms": ["type", "category"], "search": True},
+    {"name": "result", "label": "Result", "kind": "text",
+     "description": "Overall outcome of the inspection.", "synonyms": ["outcome", "status"], "search": True},
+    {"name": "inspected_at", "label": "Inspection date", "kind": "date",
+     "description": "Date the inspection took place (YYYY-MM-DD).", "synonyms": ["date", "inspected", "inspection date"]},
+    {"name": "issues_found", "label": "Issues found", "kind": "number",
+     "description": "Number of issues recorded during the inspection.", "synonyms": ["issues", "faults", "findings"]},
+    {"name": "downtime_hours", "label": "Downtime (hours)", "kind": "number",
+     "description": "Hours of downtime recorded for the inspection.", "synonyms": ["downtime", "outage"]},
+    {"name": "estimated_cost_eur", "label": "Estimated cost (EUR)", "kind": "number",
+     "description": "Estimated cost of resolving inspection findings in euros.", "synonyms": ["cost", "price", "budget", "euros"]},
+    {"name": "summary", "label": "Summary", "kind": "text",
+     "description": "Free-text summary of inspection findings.", "synonyms": ["notes", "description", "details"], "search": True},
 ]
 INSPECTION_FIELD_BY_NAME = {field["name"]: field for field in INSPECTION_FIELDS}
 TEXT_OPS = ["eq", "neq", "contains", "not_contains", "in", "is_null", "is_not_null"]
@@ -126,13 +152,15 @@ def ensure_database() -> None:
 
 
 def schema_for_prompt(dataset_key: str = "work_orders") -> dict[str, Any]:
-    # Give the model only the selected table's fields and a few real category values.
+    """Describe the selected table to the model using only registered fields."""
     dataset = get_dataset(dataset_key)
     schema: list[dict[str, Any]] = []
     with database_connection() as connection:
         for field in dataset["fields"]:
-            item = {key: field[key] for key in ("name", "label", "kind", "synonyms")}
+            # Send the short meaning as well as the column name, label, type, and synonyms.
+            item = {key: field[key] for key in ("name", "label", "kind", "description", "synonyms")}
             if field["kind"] == "text" and field["name"] not in {"notes", "summary", "ticket_no", "inspection_id"}:
+                # Real values help the model choose exact category spellings.
                 rows = connection.execute(
                     'SELECT DISTINCT "' + field["name"] + '" FROM "' + dataset["table"] + '" WHERE "' + field["name"] + '" IS NOT NULL ORDER BY 1 LIMIT 12'
                 ).fetchall()
@@ -142,6 +170,7 @@ def schema_for_prompt(dataset_key: str = "work_orders") -> dict[str, Any]:
 
 
 def build_messages(user_query: str, dataset_key: str = "work_orders") -> list[dict[str, str]]:
+    """Put the request and selected field schema into the model's messages."""
     dataset = get_dataset(dataset_key)
     context = {
         "user_query": user_query,
@@ -155,6 +184,7 @@ def build_messages(user_query: str, dataset_key: str = "work_orders") -> list[di
 
 
 def build_repair_messages(bad_content: str, error: str, user_query: str, dataset_key: str = "work_orders") -> list[dict[str, str]]:
+    """Give a failed plan back to the model with the same field schema."""
     context = {
         "user_query": user_query,
         "current_date": date.today().isoformat(),
@@ -231,6 +261,8 @@ def parse_command(content: str) -> dict[str, Any]:
     return payload
 
 
+# Optional demo vocabulary: map phrases in the request to exact seeded values.
+# These patterns are separate from the field schema and can be replaced per dataset.
 CATEGORY_PATTERNS: dict[str, list[tuple[str, tuple[str, ...]]]] = {
     "priority": [
         ("Critical", (r"\bcritical\b",)),
@@ -278,6 +310,8 @@ INSPECTION_CATEGORY_PATTERNS: dict[str, list[tuple[str, tuple[str, ...]]]] = {
     ],
 }
 
+# The shared planner and validator use this registry to select one allowed table.
+# `fields` drive model input and validation; `columns` only configure the browser table.
 DATASETS: dict[str, dict[str, Any]] = {
     "work_orders": {
         "label": "Work orders", "table": "work_orders", "fields": FIELDS,
@@ -384,6 +418,7 @@ def category_fields_in_node(node: dict[str, Any], category_fields: frozenset[str
 
 
 def rank_hints(query: str, dataset_key: str = "work_orders") -> tuple[dict[str, str] | None, int | None]:
+    """Handle a few ranking phrases that matter to these demo datasets."""
     text = query.lower()
     limit_match = re.search(r"\b(?:top|first|only)\s+(\d{1,3})\b", text)
     if not limit_match:
@@ -501,7 +536,8 @@ def normalize_relative_date_filters(
 
 
 def normalize_plan(raw_plan: dict[str, Any], query: str, dataset_key: str | None = None) -> dict[str, Any]:
-    # Treat model output as untrusted: bind it to one registered schema before use.
+    """Validate a model plan and apply the demo's optional language hints."""
+    # The model's JSON is untrusted. Only registered fields and valid values survive.
     dataset_key = dataset_key or str(raw_plan.get("dataset", "work_orders"))
     dataset = get_dataset(dataset_key)
     field_by_name = dataset["field_by_name"]
@@ -512,6 +548,8 @@ def normalize_plan(raw_plan: dict[str, Any], query: str, dataset_key: str | None
     raw_filters = raw_plan.get("filters") or []
     if not isinstance(raw_filters, list) or len(raw_filters) > 20:
         raise QueryError("Plan filters must be an array with at most 20 items")
+    # These date and category corrections handle known demo wording; they are not
+    # required by the general schema -> plan -> validation flow.
     raw_filters, relative_date_description = normalize_relative_date_filters(
         raw_filters, query, dataset["date_field"], dataset["date_context"]
     )
@@ -606,6 +644,7 @@ def validate_expression(
     depth: int = 0,
     fields: dict[str, dict[str, Any]] = FIELD_BY_NAME,
 ) -> dict[str, Any]:
+    """Check a filter tree against the chosen dataset's field allowlist."""
     # Reject unknown columns and operators before any query reaches SQLite.
     if depth > 5 or not isinstance(node, dict):
         raise QueryError("Filter groups must be valid objects no more than five levels deep")
@@ -685,6 +724,9 @@ def compile_expression(
     fields: list[dict[str, Any]] = FIELDS,
     field_by_name: dict[str, dict[str, Any]] = FIELD_BY_NAME,
 ) -> tuple[str, list[Any]]:
+    """Turn a validated filter into SQLite SQL and bound parameters."""
+    # This is the database-specific adapter. An ORM integration would instead
+    # translate the same validated nodes into ORM filter expressions.
     # Column names come from the allowlist; user/model values remain SQL parameters.
     if "and" in node or "or" in node:
         key = "and" if "and" in node else "or"
@@ -768,6 +810,7 @@ def execute_query(
     page_size: int,
     dataset_key: str = "work_orders",
 ) -> dict[str, Any]:
+    """Run the validated plan for one registered table and return a result page."""
     # The registry controls table/column names; only filter values enter SQL bindings.
     dataset = get_dataset(dataset_key)
     fields = dataset["fields"]
